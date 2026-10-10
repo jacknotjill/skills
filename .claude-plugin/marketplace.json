@@ -1,0 +1,16 @@
+{
+  "name": "jacknotjill",
+  "description": "Jack's personal Agent Skills",
+  "owner": {
+    "name": "jacknotjill",
+    "url": "https://github.com/jacknotjill"
+  },
+  "plugins": [
+    {
+      "name": "jacknotjill",
+      "description": "Every skill in this repository's skills/ directory",
+      "source": "./",
+      "license": "MIT"
+    }
+  ]
+}
