@@ -8,8 +8,9 @@ details into a skill.
 
 - `skills/<name>/SKILL.md`: one directory per skill. Only skills go here,
   because every installer discovers everything under `skills/`.
-- `template/`: the starting point for a new skill. It sits outside `skills/`
-  so installers don't pick it up.
+- `template/SKILL.template.md`: the starting point for a new skill. Installers
+  scan the whole repo for files named `SKILL.md`, so the template is named
+  differently.
 - `.claude-plugin/marketplace.json`: exposes the whole repo as one Claude Code
   plugin. Its entry has `"source": "./"` and no `skills` list, so new skills
   under `skills/` load without editing this file.
@@ -26,6 +27,12 @@ details into a skill.
   relative paths.
 - Don't add a `SKILL.md` at the repository root; it would turn the whole repo
   into one skill for some installers.
+
+## Skills that write
+
+Any skill whose output people read (docs, pages, messages, prompts) loads
+`writing-guidelines`. Link it as `../writing-guidelines/SKILL.md` and name it,
+so the agent can find it whether the skills are installed together or not.
 
 ## Checks
 

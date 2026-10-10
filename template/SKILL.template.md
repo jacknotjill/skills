@@ -5,7 +5,7 @@ description: Replace with what this skill does and when to use it. Name the task
 
 # Template skill
 
-Copy this directory to `skills/<your-skill-name>/`, set `name` to match the
+Copy this file to `skills/<your-skill-name>/SKILL.md`, set `name` to match the
 directory name, and replace this body with instructions.
 
 Keep this file under 500 lines. Put long reference material in `references/`,

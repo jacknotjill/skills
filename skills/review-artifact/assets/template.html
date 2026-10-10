@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* A review page: the story of the change in one reading column, then every
+   hunk of the diff grouped by intent, with the intents listed beside it. */
+:root {
+  --bg: #f7f7f5; --surface: #ffffff; --fg: #1d1f21; --muted: #5f6368; --line: #e1e2de;
+  --accent: #2b5fa8; --accent-soft: #e9eff8;
+  --add-bg: #e7f5ea; --add-fg: #1d5e2e; --add-mk: #2f8a47;
+  --del-bg: #fbeaea; --del-fg: #8a2424; --del-mk: #c23b3b;
+  --hunk-bg: #eff0ed;
+  --ok: #2f7a45; --ok-bg: #e5f3e9; --warn: #8a5a00; --warn-bg: #fdf1d8; --bad: #8a2424; --bad-bg: #fbeaea;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151719; --surface: #1d2023; --fg: #e8eaed; --muted: #a0a5ab; --line: #33373b;
+    --accent: #8cb4f0; --accent-soft: #22303f;
+    --add-bg: #15301e; --add-fg: #a6e3b5; --add-mk: #5fc27c;
+    --del-bg: #3a1a1c; --del-fg: #f2b0b0; --del-mk: #e57373;
+    --hunk-bg: #25292d;
+    --ok: #7fd49a; --ok-bg: #1b3324; --warn: #f0c46b; --warn-bg: #3a2e14; --bad: #f2b0b0; --bad-bg: #3a1a1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151719; --surface: #1d2023; --fg: #e8eaed; --muted: #a0a5ab; --line: #33373b;
+  --accent: #8cb4f0; --accent-soft: #22303f;
+  --add-bg: #15301e; --add-fg: #a6e3b5; --add-mk: #5fc27c;
+  --del-bg: #3a1a1c; --del-fg: #f2b0b0; --del-mk: #e57373;
+  --hunk-bg: #25292d;
+  --ok: #7fd49a; --ok-bg: #1b3324; --warn: #f0c46b; --warn-bg: #3a2e14; --bad: #f2b0b0; --bad-bg: #3a1a1c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.page { max-width: 1240px; margin: 0 auto; padding: 40px 20px 80px; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* Header */
+.top { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+.lede { font-size: 1.08rem; max-width: 70ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: var(--font-mono); font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); white-space: nowrap; }
+.chip a { color: inherit; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+.chip.warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.chip.bad { background: var(--bad-bg); color: var(--bad); border-color: transparent; }
+
+/* Context column: components the plan's context_html can use */
+.context { display: grid; gap: 44px; padding-block: 36px; max-width: 780px; }
+.block { display: grid; gap: 14px; }
+.block > p, .block li { max-width: 70ch; }
+ul.plain, ol.plain { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table.grid { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.92rem; }
+table.grid th, table.grid td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+table.grid tr:last-child td { border-bottom: 0; }
+table.grid th { font-weight: 600; font-size: 0.8rem; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; background: var(--hunk-bg); }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; max-width: 72ch; }
+.points { display: grid; gap: 10px; }
+.point { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.point > div { min-width: 0; display: grid; gap: 4px; }
+.tag { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-top: 2px; }
+.tag.decide { background: var(--warn-bg); color: var(--warn); }
+.tag.risk { background: var(--bad-bg); color: var(--bad); }
+.tag.known { background: var(--hunk-bg); color: var(--muted); }
+.tag.checked { background: var(--ok-bg); color: var(--ok); }
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.num { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; }
+.num b { font-family: var(--font-mono); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.num span { font-size: 0.85rem; color: var(--muted); }
+pre.code { margin: 0; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; white-space: pre; }
+
+/* The change: intents on the left, their hunks on the right */
+.changes-head { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-block: 28px 20px; }
+.changes-head > p { max-width: 70ch; }
+.changes { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
+.changes nav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); max-height: calc(100vh - 32px); overflow-y: auto; }
+.changes nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.changes nav a { display: grid; grid-template-columns: 1.6em 1fr; gap: 6px; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--fg); border-left: 3px solid transparent; }
+.changes nav a:hover { background: var(--accent-soft); }
+.changes nav a.here { background: var(--accent-soft); border-left-color: var(--accent); }
+.nav-n { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); padding-top: 1px; }
+.nav-body { display: grid; gap: 1px; min-width: 0; }
+.nav-title { font-size: 0.92rem; font-weight: 500; line-height: 1.35; }
+.nav-sum { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+.counts { font-family: var(--font-mono); font-size: 0.78rem; }
+.a { color: var(--add-mk); } .d { color: var(--del-mk); }
+.change-list { display: grid; gap: 48px; min-width: 0; }
+.change { display: grid; gap: 12px; min-width: 0; scroll-margin-top: 16px; }
+.change-head { display: grid; gap: 4px; }
+.note { display: grid; gap: 8px; max-width: 72ch; }
+.note ul, .note ol { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.file-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; margin-top: 6px; }
+.file-meta .path { background: none; padding: 0; color: var(--muted); }
+.status { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; }
+.empty { color: var(--muted); font-size: 0.9rem; }
+details > summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+details[open] > summary { margin-bottom: 8px; }
+.diff-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table.diff { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.55; font-variant-numeric: tabular-nums; }
+table.diff td { padding: 0 10px; vertical-align: top; }
+table.diff td.ln { width: 1%; min-width: 3.2em; text-align: right; color: var(--muted); user-select: none; opacity: 0.75; padding-right: 8px; }
+table.diff td.code { white-space: pre; padding-left: 6px; }
+table.diff .mk { display: inline-block; width: 1.2em; color: var(--muted); user-select: none; }
+table.diff tr.add { background: var(--add-bg); }
+table.diff tr.add td.code { color: var(--add-fg); }
+table.diff tr.add .mk { color: var(--add-mk); }
+table.diff tr.del { background: var(--del-bg); }
+table.diff tr.del td.code { color: var(--del-fg); }
+table.diff tr.del .mk { color: var(--del-mk); }
+table.diff tr.hunk td { background: var(--hunk-bg); color: var(--muted); padding-block: 3px; }
+
+@media (max-width: 900px) {
+  .changes { grid-template-columns: minmax(0, 1fr); }
+  .changes nav { position: static; max-height: none; }
+}
+@media (max-width: 480px) {
+  .page { padding: 28px 16px 60px; }
+  h1 { font-size: 1.6rem; }
+  .point { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <span class="eyebrow">{{EYEBROW}}</span>
+    <h1>{{TITLE}}</h1>
+    <p class="lede">{{LEDE}}</p>
+    <div class="chips">{{CHIPS}}</div>
+  </header>
+
+  <div class="context">
+{{CONTEXT}}
+  </div>
+
+  <div class="changes-head">
+    <span class="eyebrow">The change</span>
+    <h2>What changed, by what it's for</h2>
+    {{CHANGES_INTRO}}
+  </div>
+  <div class="changes">
+    <nav aria-label="Changes by intent"><ol>
+{{NAV}}
+    </ol></nav>
+    <div class="change-list">
+{{CHANGES}}
+    </div>
+  </div>
+</div>
+<script>
+// Mark the intent currently on screen in the left-hand list.
+(() => {
+  const links = new Map([...document.querySelectorAll('.changes nav a')].map(a => [a.hash.slice(1), a]));
+  if (!('IntersectionObserver' in window) || !links.size) return;
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      links.forEach(a => a.classList.remove('here'));
+      links.get(e.target.id)?.classList.add('here');
+    }
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  document.querySelectorAll('.change').forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>

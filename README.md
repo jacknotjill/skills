@@ -14,6 +14,13 @@ skills/
     └── assets/         # optional: templates, data
 ```
 
+## Skills
+
+| Skill | What it does |
+| --- | --- |
+| [writing-guidelines](skills/writing-guidelines/SKILL.md) | How to write anything a person reads, plus a guide for prompts. Other skills that write load it. |
+| [review-artifact](skills/review-artifact/SKILL.md) | A one-page review of a code change: a short introduction, then every hunk grouped by intent. |
+
 ## Install
 
 **Claude Code**, as a plugin marketplace (updates arrive with `/plugin update`):
@@ -40,8 +47,8 @@ skills directory).
 
 ## Add a skill
 
-1. Copy `template/` to `skills/<name>/`. The name is lowercase letters, digits
-   and single hyphens, and must match the folder name.
+1. Copy `template/SKILL.template.md` to `skills/<name>/SKILL.md`. The name is
+   lowercase letters, digits and single hyphens, and must match the folder name.
 2. Write the `description` as what the skill does and when to use it; it is
    all an agent sees before choosing to load the skill.
 3. Run `uv run --with pyyaml scripts/validate_skills.py` (CI runs it too).
