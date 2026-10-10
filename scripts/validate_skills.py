@@ -12,6 +12,10 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 KNOWN_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+# Fields one client reads and others ignore, such as Claude Code's switch for
+# skills that only run when invoked by name. Allowed, since the skill still
+# works everywhere.
+CLIENT_FIELDS = {"disable-model-invocation", "user-invocable", "argument-hint", "model"}
 
 
 def check(skill_dir: Path) -> list[str]:
@@ -45,7 +49,7 @@ def check(skill_dir: Path) -> list[str]:
     if compatibility is not None and len(str(compatibility)) > 500:
         errors.append("compatibility must be at most 500 chars")
 
-    unknown = set(meta) - KNOWN_FIELDS
+    unknown = set(meta) - KNOWN_FIELDS - CLIENT_FIELDS
     if unknown:
         errors.append(f"unknown frontmatter fields: {', '.join(sorted(unknown))}")
 
