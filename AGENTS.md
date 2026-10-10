@@ -15,6 +15,9 @@ details into a skill.
   plugin. Its entry has `"source": "./"` and no `skills` list, so new skills
   under `skills/` load without editing this file.
 - `scripts/validate_skills.py`: checks frontmatter against the spec. CI runs it.
+- `scripts/vendor.sh` and `THIRD_PARTY.md`: skills copied from other repos
+  (`show-me`, `visual-pr`, `grill-me`, `grilling`). Never edit those folders;
+  refresh them with the script so they stay identical to upstream.
 
 ## Writing a skill
 

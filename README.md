@@ -20,6 +20,13 @@ skills/
 | --- | --- |
 | [writing-guidelines](skills/writing-guidelines/SKILL.md) | How to write anything a person reads, plus a guide for prompts. Other skills that write load it. |
 | [review-artifact](skills/review-artifact/SKILL.md) | A one-page review of a code change: a short introduction, then every hunk grouped by intent. |
+| [show-me](skills/show-me/SKILL.md) | Explains the current topic with the smallest visual that works: pseudocode, call trees, file trees, Mermaid, or one HTML page. Type `/show-me`. From [HumanLayer](https://github.com/humanlayer/skills). |
+| [visual-pr](skills/visual-pr/SKILL.md) | Writes a PR description with a one-sentence why, reviewer notes, and a `show-me`-style outline of the change. Type `/visual-pr`. From [HumanLayer](https://github.com/humanlayer/skills). |
+| [grill-me](skills/grill-me/SKILL.md) | Interviews you in rounds of questions until a plan or idea is sharp. Type `/grill-me`; it runs `grilling`. From [Matt Pocock](https://github.com/mattpocock/skills). |
+| [grilling](skills/grilling/SKILL.md) | The interview `grill-me` runs, also used when you ask to be grilled. From [Matt Pocock](https://github.com/mattpocock/skills). |
+
+Third-party skills are copied unchanged under their MIT licences; see
+[THIRD_PARTY.md](THIRD_PARTY.md) for sources and how to update them.
 
 ## Install
 
